@@ -1,5 +1,5 @@
 {
-  "Lesson1. Numbers": [
+  "Capter1.Numbers": [
     {
       "encoded": "ÄŁÄ",
       "decoded": "1=1"
@@ -17,7 +17,7 @@
       "decoded": "0=0"
     }
   ],
-  "Lesson2. Arithmetics": [
+  "Capter2. Arithmetics": [
     {
       "encoded": "Ä+ÄŁÄÄ",
       "decoded": "1+1=2"

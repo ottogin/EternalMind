@@ -1,0 +1,44 @@
+{
+  "title": "Chapter 1: Numbers",
+  "description": "Introduction to basic numerical concepts",
+  "lessons": [
+    {
+      "id": "1.1",
+      "title": "Basic Numbers",
+      "lines": [
+        {
+          "encoded": "ÄŁÄ",
+          "decoded": "1=1"
+        },
+        {
+          "encoded": "ÉŁÉ",
+          "decoded": "0=0"
+        }
+      ],
+      "goal": {
+        "description": "Learn to recognize basic numbers",
+        "symbols": ["Ä", "É", "Ł"]
+      },
+      "comment": "We start with the most basic numerical concepts: one and zero"
+    },
+    {
+      "id": "1.2",
+      "title": "Number Comparison",
+      "lines": [
+        {
+          "encoded": "ÄŤÉ",
+          "decoded": "1!=0"
+        },
+        {
+          "encoded": "ÉŤÄ",
+          "decoded": "0!=1"
+        }
+      ],
+      "goal": {
+        "description": "Learn to compare numbers",
+        "symbols": ["Ť"]
+      },
+      "comment": "Introducing the concept of inequality"
+    }
+  ]
+} 

@@ -1,0 +1,44 @@
+{
+  "title": "Chapter 2: Arithmetics",
+  "description": "Basic arithmetic operations",
+  "lessons": [
+    {
+      "id": "2.1",
+      "title": "Addition",
+      "lines": [
+        {
+          "encoded": "Ä+ÄŁÄÄ",
+          "decoded": "1+1=2"
+        },
+        {
+          "encoded": "ÄÄ+ÄŁÄÄÄ",
+          "decoded": "2+1=3"
+        }
+      ],
+      "goal": {
+        "description": "Learn addition operation",
+        "symbols": ["+", "ÄÄ", "ÄÄÄ"]
+      },
+      "comment": "Introducing the concept of addition and larger numbers"
+    },
+    {
+      "id": "2.2",
+      "title": "Subtraction",
+      "lines": [
+        {
+          "encoded": "ÄÄ-ÄŁÄ",
+          "decoded": "2-1=1"
+        },
+        {
+          "encoded": "ÄÄÄ-ÄÄŁÄ",
+          "decoded": "3-2=1"
+        }
+      ],
+      "goal": {
+        "description": "Learn subtraction operation",
+        "symbols": ["-"]
+      },
+      "comment": "Introducing the concept of subtraction"
+    }
+  ]
+} 
