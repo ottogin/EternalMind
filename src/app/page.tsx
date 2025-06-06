@@ -42,10 +42,37 @@ export default function Home() {
     );
   };
 
+  const createBinaryImage = (text: string) => {
+    // Convert text to one long binary string
+    const binaryArray = convertToBinary(text);
+    const binaryString = binaryArray.join('');
+    
+    // Calculate dimensions
+    const width = 17; // Fixed width as requested
+    const height = Math.ceil(binaryString.length / width);
+    
+    // Pad the binary string to fit the grid perfectly
+    const paddedBinary = binaryString.padEnd(width * height, '0');
+    
+    // Create the image grid
+    const rows: string[] = [];
+    for (let i = 0; i < height; i++) {
+      const row = paddedBinary.slice(i * width, (i + 1) * width)
+        .split('')
+        .map(bit => bit === '1' ? '█' : '░')
+        .join('');
+      rows.push(row);
+    }
+    
+    return rows;
+  };
+
   const getDisplayMessage = (text: string): string | string[] => {
     switch (viewMode) {
       case 'binary':
         return convertToBinary(text);
+      case 'image':
+        return createBinaryImage(text);
       case 'text':
       default:
         return text;
@@ -102,6 +129,18 @@ export default function Home() {
         </span>
       );
     });
+  };
+
+  const renderBinaryImage = (imageRows: string[]) => {
+    return (
+      <div className="font-mono whitespace-pre leading-4 tracking-[0.2em]">
+        {imageRows.map((row, index) => (
+          <div key={index} className="text-center">
+            {row}
+          </div>
+        ))}
+      </div>
+    );
   };
 
   const getDictionaryEntries = () => {
@@ -375,6 +414,16 @@ EXPLANATION:
                   >
                     Binary
                   </button>
+                  <button
+                    onClick={() => setViewMode('image')}
+                    className={`px-3 py-1.5 rounded text-sm ${
+                      viewMode === 'image'
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-slate-700 hover:bg-slate-600'
+                    }`}
+                  >
+                    Image
+                  </button>
                 </div>
               </div>
               <div className="flex items-center space-x-4">
@@ -406,7 +455,9 @@ EXPLANATION:
                     <div className="text-green-400">
                       {viewMode === 'text' 
                         ? renderEncodedText(getDisplayMessage(line.encoded) as string) 
-                        : renderBinaryText(getDisplayMessage(line.encoded) as string[])}
+                        : viewMode === 'binary'
+                        ? renderBinaryText(getDisplayMessage(line.encoded) as string[])
+                        : renderBinaryImage(getDisplayMessage(line.encoded) as string[])}
                     </div>
                     {showTranslation && (
                       <div className="text-gray-500 text-sm">
