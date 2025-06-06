@@ -310,16 +310,17 @@ export default function Home() {
     setFeedbackResponse('');
     setMessageDiff(null);
     
-    const currentDictionary = Object.entries(dictionary)
-      .map(([symbol, meaning]) => `${symbol}: ${meaning}`)
-      .join('\n');
+    let prompt: string;
+    
+    if (isAiMode) {
+      // AI Mode: Use complete dictionary and focus on translation
+      const currentDictionary = Object.entries(dictionary)
+        .map(([symbol, meaning]) => `${symbol}: ${meaning}`)
+        .join('\n');
 
-    // Get the last AI message if in AI mode
-    const messageToDecode = isAiMode 
-      ? chatMessages[chatMessages.length - 1]?.content || ''
-      : selectedLesson.lines.map(line => line.encoded).join('\n');
+      const messageToDecode = chatMessages[chatMessages.length - 1]?.content || '';
 
-    const prompt = `You received a message using a symbolic language. Here is the dictionary of all available symbols:
+      prompt = `You received a message using a symbolic language. Here is the dictionary of all available symbols:
 
 ${currentDictionary}
 
@@ -327,6 +328,25 @@ This is the message to decode:
 ${messageToDecode}
 
 Please provide a detailed translation and explanation of what this message means.`;
+    } else {
+      // Learning Mode: Use partial dictionary and focus on discovering new symbols
+      const knownDictionary = Object.entries(dictionary)
+        .slice(0, selectedLesson.dictionary.start)
+        .map(([symbol, meaning]) => `${symbol}: ${meaning}`)
+        .join('\n');
+
+      const newMessage = selectedLesson.lines.map(line => line.encoded).join('\n');
+
+      prompt = `You received an interstellar message with weird scribbles. You already reconstructed some of them, but there is a new message teaching you something new.
+
+Here is what you already know:
+${knownDictionary}
+
+Here is the new message:
+${newMessage}
+
+Look over the text and try to guess what the new symbols mean. Provide your reasoning for each new symbol you discover.`;
+    }
 
     setSentPrompt(prompt);
     console.log('Sending prompt:', prompt);
