@@ -1,0 +1,24 @@
+{
+  "title": "Ch5: FelicisAI",
+  "lessons": [
+    {
+      "id": "F1",
+      "title": "AI Chat",
+      "comment": "Chat with FelicisAI using symbolic language",
+      "dictionary": {
+        "start": 36,
+        "end": 36
+      },
+      "goal": {
+        "description": "Learn to communicate with FelicisAI using symbolic language",
+        "symbols": []
+      },
+      "lines": [
+        {
+          "encoded": "❇ | ❀ ❁ ❄ | ✾ ✿ ❈",
+          "decoded": "story | AI happy | says hello felicis fellows"
+        }
+      ]
+    }
+  ]
+}

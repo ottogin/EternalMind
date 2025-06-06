@@ -6,12 +6,13 @@ import numbersChapter from '../data/chapters/numbers.json';
 import arithmeticChapter from '../data/chapters/arithmetic.json';
 import programmingChapter from '../data/chapters/programming.json';
 import naturalLanguageChapter from '../data/chapters/natural_language.json';
+import felicisAiChapter from '../data/chapters/felicis_ai.json';
 import dictionary from '../data/dictionary.json';
 
 type Chapter = typeof numbersChapter;
 type Lesson = Chapter['lessons'][0];
 
-const chapters = [numbersChapter, arithmeticChapter, programmingChapter, naturalLanguageChapter];
+const chapters = [numbersChapter, arithmeticChapter, programmingChapter, naturalLanguageChapter, felicisAiChapter];
 
 export default function Home() {
   const [selectedChapter, setSelectedChapter] = useState<Chapter>(chapters[0]);
@@ -32,6 +33,10 @@ export default function Home() {
   const [messageDiff, setMessageDiff] = useState<{ original: string; updated: string } | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
+  const [chatInput, setChatInput] = useState('');
+  const [chatMessages, setChatMessages] = useState<Array<{ role: 'user' | 'assistant', content: string }>>([]);
+  const [isAiMode, setIsAiMode] = useState(false);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
   const { error } = useChat({
     api: '/api/chat',
@@ -304,18 +309,22 @@ export default function Home() {
     setMessageDiff(null);
     
     const currentDictionary = Object.entries(dictionary)
-      .slice(0, selectedLesson.dictionary.start)
       .map(([symbol, meaning]) => `${symbol}: ${meaning}`)
       .join('\n');
 
-    const prompt = `You received a signal from a far-away galaxy. This is what you were able to decode so far:
+    // Get the last AI message if in AI mode
+    const messageToDecode = isAiMode 
+      ? chatMessages[chatMessages.length - 1]?.content || ''
+      : selectedLesson.lines.map(line => line.encoded).join('\n');
+
+    const prompt = `You received a message using a symbolic language. Here is the dictionary of all available symbols:
 
 ${currentDictionary}
 
-This is a new portion of the message teaching you something new:
-${selectedLesson.lines.map(line => line.encoded).join('\n')}
+This is the message to decode:
+${messageToDecode}
 
-Detect the new symbols and try to understand what they mean. Provide your reasoning.`;
+Please provide a detailed translation and explanation of what this message means.`;
 
     setSentPrompt(prompt);
     console.log('Sending prompt:', prompt);
@@ -451,6 +460,87 @@ EXPLANATION:
     await generateFeedback(aiResponse);
   };
 
+  // Validate if input contains only allowed symbols
+  const validateSymbols = (input: string): boolean => {
+    const allowedSymbols = Object.keys(dictionary);
+    return input.split('').every(char => allowedSymbols.includes(char) || char === ' ');
+  };
+
+  // Handle chat message submission
+  const handleChatSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateSymbols(chatInput)) {
+      alert('Please use only allowed symbols from the dictionary');
+      return;
+    }
+
+    const userMessage = chatInput.trim();
+    if (!userMessage) return;
+
+    // Add user message to chat
+    setChatMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+    setChatInput('');
+
+    // Prepare context for AI
+    const context = `You are FelicisAI, an AI that communicates using a symbolic language. 
+You must ONLY use the following symbols: ${Object.keys(dictionary).join(' ')}
+Each symbol has a specific meaning: ${Object.entries(dictionary).map(([symbol, meaning]) => `${symbol}: ${meaning}`).join(', ')}
+You must ALWAYS start your response with "❇ | ❀ ❁ ❄ | ✾ ✿ ❈" (which means "story | AI happy | says hello felicis fellows")
+Then continue your response using only the allowed symbols.
+The user's message was: ${userMessage}`;
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ data: { prompt: context } }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error('No reader available');
+      }
+
+      let fullResponse = '';
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        const text = new TextDecoder().decode(value);
+        fullResponse += text;
+      }
+
+      // Add AI response to chat
+      setChatMessages(prev => [...prev, { role: 'assistant', content: fullResponse }]);
+    } catch (error) {
+      console.error('Error in chat:', error);
+    }
+  };
+
+  // Scroll chat to bottom when new messages arrive
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [chatMessages]);
+
+  // Handle chapter selection
+  const handleChapterSelect = (chapter: Chapter) => {
+    setSelectedChapter(chapter);
+    setIsAiMode(chapter.title === 'Ch5: FelicisAI');
+    if (chapter.title === 'Ch5: FelicisAI') {
+      setChatMessages([{ role: 'assistant', content: '❇ | ❀ ❁ ❄ | ✾ ✿ ❈' }]);
+    } else {
+      setSelectedLesson(chapter.lessons[0]);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 to-black text-white p-4">
       <h1 className="text-3xl font-bold text-center mb-4 text-blue-400">
@@ -465,10 +555,7 @@ EXPLANATION:
               {chapters.map((chapter) => (
                 <button
                   key={chapter.title}
-                  onClick={() => {
-                    setSelectedChapter(chapter);
-                    setSelectedLesson(chapter.lessons[0]);
-                  }}
+                  onClick={() => handleChapterSelect(chapter)}
                   className={`px-3 py-1.5 rounded whitespace-nowrap text-sm ${
                     selectedChapter.title === chapter.title
                       ? 'bg-blue-500 text-white'
@@ -480,75 +567,81 @@ EXPLANATION:
               ))}
             </div>
 
-            <div className="h-[250px] overflow-y-auto pr-2 custom-scrollbar">
-              <div className="space-y-2">
-                {selectedChapter.lessons.map((lesson) => (
-                  <div
-                    key={lesson.id}
-                    onClick={() => setSelectedLesson(lesson)}
-                    className={`p-2 rounded cursor-pointer transition-all duration-200 ${
-                      selectedLesson.id === lesson.id
-                        ? 'bg-blue-500/20 border border-blue-500'
-                        : 'bg-slate-700/50 hover:bg-slate-700'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-0.5">
-                      <h3 className="text-sm font-semibold">{lesson.title}</h3>
-                      <span className="text-xs text-gray-400">{lesson.id}</span>
+            {!isAiMode && (
+              <div className="h-[250px] overflow-y-auto pr-2 custom-scrollbar">
+                <div className="space-y-2">
+                  {selectedChapter.lessons.map((lesson) => (
+                    <div
+                      key={lesson.id}
+                      onClick={() => setSelectedLesson(lesson)}
+                      className={`p-2 rounded cursor-pointer transition-all duration-200 ${
+                        selectedLesson.id === lesson.id
+                          ? 'bg-blue-500/20 border border-blue-500'
+                          : 'bg-slate-700/50 hover:bg-slate-700'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-0.5">
+                        <h3 className="text-sm font-semibold">{lesson.title}</h3>
+                        <span className="text-xs text-gray-400">{lesson.id}</span>
+                      </div>
+                      <p className="text-xs text-gray-400 line-clamp-1">{lesson.comment}</p>
                     </div>
-                    <p className="text-xs text-gray-400 line-clamp-1">{lesson.comment}</p>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           <div className="bg-slate-800/50 rounded-lg p-4 backdrop-blur-sm">
-            <h3 className="text-lg font-bold text-blue-400 justify-middle mb-3">Incoming message</h3>
+            <h3 className="text-lg font-bold text-blue-400 justify-middle mb-3">
+              {isAiMode ? 'Chat with FelicisAI' : 'Incoming message'}
+            </h3>
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center space-x-4">
-                <div className="flex space-x-3">
-                  <button
-                    onClick={() => setViewMode('text')}
-                    className={`px-3 py-1.5 rounded text-sm ${
-                      viewMode === 'text'
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-slate-700 hover:bg-slate-600'
-                    }`}
-                  >
-                    Text
-                  </button>
-                  <button
-                    onClick={() => setViewMode('binary')}
-                    className={`px-3 py-1.5 rounded text-sm ${
-                      viewMode === 'binary'
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-slate-700 hover:bg-slate-600'
-                    }`}
-                  >
-                    Binary
-                  </button>
-                  <button
-                    onClick={() => setViewMode('image')}
-                    className={`px-3 py-1.5 rounded text-sm ${
-                      viewMode === 'image'
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-slate-700 hover:bg-slate-600'
-                    }`}
-                  >
-                    Image
-                  </button>
-                  <button
-                    onClick={() => setViewMode('audio')}
-                    className={`px-3 py-1.5 rounded text-sm ${
-                      viewMode === 'audio'
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-slate-700 hover:bg-slate-600'
-                    }`}
-                  >
-                    Audio
-                  </button>
-                </div>
+                {!isAiMode && (
+                  <div className="flex space-x-3">
+                    <button
+                      onClick={() => setViewMode('text')}
+                      className={`px-3 py-1.5 rounded text-sm ${
+                        viewMode === 'text'
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-slate-700 hover:bg-slate-600'
+                      }`}
+                    >
+                      Text
+                    </button>
+                    <button
+                      onClick={() => setViewMode('binary')}
+                      className={`px-3 py-1.5 rounded text-sm ${
+                        viewMode === 'binary'
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-slate-700 hover:bg-slate-600'
+                      }`}
+                    >
+                      Binary
+                    </button>
+                    <button
+                      onClick={() => setViewMode('image')}
+                      className={`px-3 py-1.5 rounded text-sm ${
+                        viewMode === 'image'
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-slate-700 hover:bg-slate-600'
+                      }`}
+                    >
+                      Image
+                    </button>
+                    <button
+                      onClick={() => setViewMode('audio')}
+                      className={`px-3 py-1.5 rounded text-sm ${
+                        viewMode === 'audio'
+                          ? 'bg-blue-500 text-white'
+                          : 'bg-slate-700 hover:bg-slate-600'
+                      }`}
+                    >
+                      Audio
+                    </button>
+                  </div>
+                )}
               </div>
               <div className="flex items-center space-x-4">
                 <label className="flex items-center space-x-2 text-sm text-gray-400">
@@ -560,43 +653,84 @@ EXPLANATION:
                   />
                   <span>Show translation</span>
                 </label>
-                <button
-                  onClick={handleCopyToClipboard}
-                  className={`px-3 py-1.5 rounded text-sm transition-colors ${
-                    copySuccess
-                      ? 'bg-green-500 text-white'
-                      : 'bg-slate-700 hover:bg-slate-600'
-                  }`}
-                >
-                  {copySuccess ? 'Copied!' : 'Copy'}
-                </button>
+                {!isAiMode && (
+                  <button
+                    onClick={handleCopyToClipboard}
+                    className={`px-3 py-1.5 rounded text-sm transition-colors ${
+                      copySuccess
+                        ? 'bg-green-500 text-white'
+                        : 'bg-slate-700 hover:bg-slate-600'
+                    }`}
+                  >
+                    {copySuccess ? 'Copied!' : 'Copy'}
+                  </button>
+                )}
               </div>
             </div>
             <div className="bg-black p-3 rounded font-mono text-green-400 h-[300px] overflow-auto">
-              <div className="space-y-3">
-                {viewMode === 'audio' ? (
-                  renderAudioPlayer(selectedLesson.lines)
-                ) : (
-                  selectedLesson.lines.map((line, index) => (
-                    <div key={index} className="space-y-0.5">
-                      <div className="text-green-400">
-                        {viewMode === 'text' 
-                          ? renderEncodedText(getDisplayMessage(line.encoded) as string) 
-                          : viewMode === 'binary'
-                          ? renderBinaryText(getDisplayMessage(line.encoded) as string[])
-                          : viewMode === 'image'
-                          ? renderBinaryImage(getDisplayMessage(line.encoded) as string[])
-                          : null}
+              {isAiMode ? (
+                <div className="space-y-4">
+                  {chatMessages.map((message, index) => (
+                    <div
+                      key={index}
+                      className={`p-3 rounded ${
+                        message.role === 'user'
+                          ? 'bg-blue-500/20 ml-4'
+                          : 'bg-green-500/20 mr-4'
+                      }`}
+                    >
+                      <div className="text-sm font-mono">
+                        {message.content}
                       </div>
                       {showTranslation && (
-                        <div className="text-gray-500 text-sm">
-                          {line.decoded}
+                        <div className="text-xs text-gray-400 mt-1">
+                          {message.content.split('').map(char => dictionary[char as keyof typeof dictionary] || char).join(' ')}
                         </div>
                       )}
                     </div>
-                  ))
-                )}
-              </div>
+                  ))}
+                  <form onSubmit={handleChatSubmit} className="flex space-x-2 mt-4">
+                    <input
+                      type="text"
+                      value={chatInput}
+                      onChange={(e) => setChatInput(e.target.value)}
+                      placeholder="Type your message using allowed symbols..."
+                      className="flex-1 px-3 py-2 rounded bg-slate-700/50 border border-slate-600 focus:border-blue-500 focus:outline-none"
+                    />
+                    <button
+                      type="submit"
+                      className="px-4 py-2 rounded bg-blue-500 hover:bg-blue-600 transition-colors"
+                    >
+                      Send
+                    </button>
+                  </form>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {viewMode === 'audio' ? (
+                    renderAudioPlayer(selectedLesson.lines)
+                  ) : (
+                    selectedLesson.lines.map((line, index) => (
+                      <div key={index} className="space-y-0.5">
+                        <div className="text-green-400">
+                          {viewMode === 'text' 
+                            ? renderEncodedText(getDisplayMessage(line.encoded) as string) 
+                            : viewMode === 'binary'
+                            ? renderBinaryText(getDisplayMessage(line.encoded) as string[])
+                            : viewMode === 'image'
+                            ? renderBinaryImage(getDisplayMessage(line.encoded) as string[])
+                            : null}
+                        </div>
+                        {showTranslation && (
+                          <div className="text-gray-500 text-sm">
+                            {line.decoded}
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
