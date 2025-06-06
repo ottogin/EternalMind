@@ -35,11 +35,6 @@ export default function Home() {
     }
   };
 
-  const filteredDictionary = Object.entries(dictionary).filter(([symbol, meaning]) => 
-    symbol.toLowerCase().includes(dictionarySearch.toLowerCase()) ||
-    meaning.toLowerCase().includes(dictionarySearch.toLowerCase())
-  );
-
   const handleSymbolHover = (symbol: string, event: React.MouseEvent) => {
     setHoveredSymbol(symbol);
     setHoverPosition({ x: event.clientX, y: event.clientY });
@@ -84,6 +79,31 @@ export default function Home() {
         </span>
       );
     });
+  };
+
+  const getDictionaryEntries = () => {
+    const entries = Object.entries(dictionary);
+    const searchLower = dictionarySearch.toLowerCase();
+    
+    return entries
+      .filter(([symbol, meaning]) => 
+        symbol.toLowerCase().includes(searchLower) ||
+        meaning.toLowerCase().includes(searchLower)
+      )
+      .map(([symbol, meaning], index) => {
+        const isInCurrentRange = index >= selectedLesson.dictionary.start && 
+                               index < selectedLesson.dictionary.end;
+        const isNewSymbol = index === selectedLesson.dictionary.end - 1;
+        const isFutureSymbol = index >= selectedLesson.dictionary.end;
+        
+        return {
+          symbol,
+          meaning,
+          isInCurrentRange,
+          isNewSymbol,
+          isFutureSymbol
+        };
+      });
   };
 
   return (
@@ -138,6 +158,7 @@ export default function Home() {
             </div>
           </div>
 
+
           <div className="bg-slate-800/50 rounded-lg p-4 backdrop-blur-sm">
             <div className="flex items-center justify-between mb-3">
               <div className="flex space-x-3">
@@ -183,31 +204,6 @@ export default function Home() {
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Right Side */}
-        <div className="space-y-4">
-          <div className="bg-slate-800/50 rounded-lg p-4 backdrop-blur-sm">
-            <h2 className="text-lg font-bold mb-3 text-blue-400">What is learned to this point</h2>
-            <div className="mb-3">
-              <input
-                type="text"
-                placeholder="Search symbols or meanings..."
-                value={dictionarySearch}
-                onChange={(e) => setDictionarySearch(e.target.value)}
-                className="w-full px-3 py-1.5 rounded bg-slate-700/50 border border-slate-600 focus:border-blue-500 focus:outline-none text-sm"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-3 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
-              {filteredDictionary.map(([symbol, meaning]) => (
-                <div key={symbol} className="bg-slate-700/50 p-2 rounded">
-                  <span className="font-mono text-base">{symbol}</span>
-                  <span className="text-gray-400 ml-2">→</span>
-                  <span className="ml-2 text-sm">{meaning}</span>
-                </div>
-              ))}
-            </div>
-          </div>
 
           <div className="bg-slate-800/50 rounded-lg p-4 backdrop-blur-sm">
             <h2 className="text-lg font-bold mb-3 text-blue-400">Learning Goals</h2>
@@ -223,6 +219,58 @@ export default function Home() {
                   </div>
                 ))}
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Side */}
+        <div className="space-y-4">
+          <div className="bg-slate-800/50 rounded-lg p-4 backdrop-blur-sm">
+            <h2 className="text-lg font-bold mb-3 text-blue-400">Dictionary</h2>
+            <div className="mb-3">
+              <input
+                type="text"
+                placeholder="Search symbols or meanings..."
+                value={dictionarySearch}
+                onChange={(e) => setDictionarySearch(e.target.value)}
+                className="w-full px-3 py-1.5 rounded bg-slate-700/50 border border-slate-600 focus:border-blue-500 focus:outline-none text-sm"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
+              {getDictionaryEntries().map(({ symbol, meaning, isInCurrentRange, isFutureSymbol }) => (
+                <div 
+                  key={symbol} 
+                  className={`p-2 rounded transition-colors duration-200 ${
+                    isInCurrentRange 
+                      ? 'bg-blue-500/20 border border-blue-500' 
+                      : isFutureSymbol
+                      ? 'bg-slate-800/50 opacity-40'
+                      : 'bg-slate-700/50'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className={`font-mono text-base ${isFutureSymbol ? 'text-gray-500' : ''}`}>
+                      {symbol}
+                    </span>
+                  </div>
+                  <div className="flex items-center mt-1">
+                    <span className={`${isFutureSymbol ? 'text-gray-600' : 'text-gray-400'}`}>→</span>
+                    <span className={`ml-2 text-sm ${isFutureSymbol ? 'text-gray-500' : ''}`}>
+                      {meaning}
+                    </span>
+                  </div>
+                  {isInCurrentRange && (
+                    <div className="text-xs text-blue-400 mt-1">
+                      Goal in this lesson!
+                    </div>
+                  )}
+                  {isFutureSymbol && (
+                    <div className="text-xs text-gray-500 mt-1">
+                      Coming soon
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         </div>

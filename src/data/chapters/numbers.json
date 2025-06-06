@@ -19,7 +19,11 @@
         "description": "Learn to recognize basic numbers",
         "symbols": ["Ä", "É", "Ł"]
       },
-      "comment": "We start with the most basic numerical concepts: one and zero"
+      "comment": "We start with the most basic numerical concepts: one and zero",
+      "dictionary": {
+        "start": 0,
+        "end": 3
+      }
     },
     {
       "id": "1.2",
@@ -38,7 +42,11 @@
         "description": "Learn to compare numbers",
         "symbols": ["Ť"]
       },
-      "comment": "Introducing the concept of inequality"
+      "comment": "Introducing the concept of inequality",
+      "dictionary": {
+        "start": 3,
+        "end": 4
+      }
     }
   ]
 } 

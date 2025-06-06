@@ -19,7 +19,11 @@
         "description": "Learn addition operation",
         "symbols": ["+", "ÄÄ", "ÄÄÄ"]
       },
-      "comment": "Introducing the concept of addition and larger numbers"
+      "comment": "Introducing the concept of addition and larger numbers",
+      "dictionary": {
+        "start": 4,
+        "end": 7
+      }
     },
     {
       "id": "2.2",
@@ -38,7 +42,11 @@
         "description": "Learn subtraction operation",
         "symbols": ["-"]
       },
-      "comment": "Introducing the concept of subtraction"
+      "comment": "Introducing the concept of subtraction",
+      "dictionary": {
+        "start": 7,
+        "end": 8
+      }
     }
   ]
 } 
