@@ -1,0 +1,141 @@
+{
+  "title": "Ch3: Programming",
+  "lessons": [
+    {
+      "id": "P1",
+      "title": "Function Definition",
+      "comment": "Introduction to defining functions",
+      "dictionary": {
+        "start": 17,
+        "end": 19
+      },
+      "goal": {
+        "description": "Learn how to define functions",
+        "symbols": ["⟑", "⟐"]
+      },
+      "lines": [
+        {
+          "encoded": "◊ ⟑ ⟐",
+          "decoded": "intro function definition"
+        },
+        {
+          "encoded": "⟑ ○ ◎ ⟐",
+          "decoded": "define function that returns zero"
+        },
+        {
+          "encoded": "⟑ ○ ● ◎ ⟐",
+          "decoded": "define function that returns one"
+        },
+        {
+          "encoded": "⟑ ○ ● ● ◎ ⟐",
+          "decoded": "define function that returns two"
+        },
+        {
+          "encoded": "⟑ ○ ● ● ● ◎ ⟐",
+          "decoded": "define function that returns three"
+        }
+      ]
+    },
+    {
+      "id": "P2",
+      "title": "Function Call",
+      "comment": "Introduction to calling functions",
+      "dictionary": {
+        "start": 19,
+        "end": 21
+      },
+      "goal": {
+        "description": "Learn how to call functions",
+        "symbols": ["⟒", "⟓"]
+      },
+      "lines": [
+        {
+          "encoded": "◊ ⟒ ⟓",
+          "decoded": "intro function call"
+        },
+        {
+          "encoded": "⟑ ○ ◎ ⟐ | ⟒ ⟓ ≐ ○ ◎",
+          "decoded": "define function that returns zero | call function equals zero"
+        },
+        {
+          "encoded": "⟑ ○ ● ◎ ⟐ | ⟒ ⟓ ≐ ○ ● ◎",
+          "decoded": "define function that returns one | call function equals one"
+        },
+        {
+          "encoded": "⟑ ○ ● ● ◎ ⟐ | ⟒ ⟓ ≐ ○ ● ● ◎",
+          "decoded": "define function that returns two | call function equals two"
+        },
+        {
+          "encoded": "⟑ ○ ● ● ● ◎ ⟐ | ⟒ ⟓ ≐ ○ ● ● ● ◎",
+          "decoded": "define function that returns three | call function equals three"
+        }
+      ]
+    },
+    {
+      "id": "P3",
+      "title": "Function Parameters",
+      "comment": "Introduction to function parameters",
+      "dictionary": {
+        "start": 21,
+        "end": 23
+      },
+      "goal": {
+        "description": "Learn how to use function parameters",
+        "symbols": ["⟔", "⟕"]
+      },
+      "lines": [
+        {
+          "encoded": "◊ ⟔ ⟕",
+          "decoded": "intro function parameters"
+        },
+        {
+          "encoded": "⟑ ⟔ ○ ◎ ⟕ ⟐ | ⟒ ○ ◎ ⟓ ≐ ○ ◎",
+          "decoded": "define function with parameter zero returns zero | call with zero equals zero"
+        },
+        {
+          "encoded": "⟑ ⟔ ○ ● ◎ ⟕ ⟐ | ⟒ ○ ● ◎ ⟓ ≐ ○ ● ◎",
+          "decoded": "define function with parameter one returns one | call with one equals one"
+        },
+        {
+          "encoded": "⟑ ⟔ ○ ● ● ◎ ⟕ ⟐ | ⟒ ○ ● ● ◎ ⟓ ≐ ○ ● ● ◎",
+          "decoded": "define function with parameter two returns two | call with two equals two"
+        },
+        {
+          "encoded": "⟑ ⟔ ○ ● ● ● ◎ ⟕ ⟐ | ⟒ ○ ● ● ● ◎ ⟓ ≐ ○ ● ● ● ◎",
+          "decoded": "define function with parameter three returns three | call with three equals three"
+        }
+      ]
+    },
+    {
+      "id": "P4",
+      "title": "Function Composition",
+      "comment": "Introduction to composing functions together",
+      "dictionary": {
+        "start": 23,
+        "end": 24
+      },
+      "goal": {
+        "description": "Learn how to compose functions",
+        "symbols": ["⟖"]
+      },
+      "lines": [
+        {
+          "encoded": "◊ ⟖",
+          "decoded": "intro function composition"
+        },
+        {
+          "encoded": "⟑ ⟔ ○ ◎ ⟕ ⟐ ⟖ ⟑ ⟔ ○ ● ◎ ⟕ ⟐ | ⟒ ○ ◎ ⟓ ≐ ○ ● ◎",
+          "decoded": "compose function(param zero) with function(param one) | call with zero equals one"
+        },
+        {
+          "encoded": "⟑ ⟔ ○ ● ◎ ⟕ ⟐ ⟖ ⟑ ⟔ ○ ● ◎ ⟕ ⟐ | ⟒ ○ ● ◎ ⟓ ≐ ○ ● ● ◎",
+          "decoded": "compose function(param one) with function(param one) | call with one equals two"
+        },
+        {
+          "encoded": "⟑ ⟔ ○ ● ● ◎ ⟕ ⟐ ⟖ ⟑ ⟔ ○ ● ◎ ⟕ ⟐ | ⟒ ○ ● ● ◎ ⟓ ≐ ○ ● ● ● ◎",
+          "decoded": "compose function(param two) with function(param one) | call with two equals three"
+        }
+      ]
+    }
+  ]
+} 

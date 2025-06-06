@@ -4,12 +4,14 @@ import { useState, useRef, useEffect } from 'react';
 import { useChat } from 'ai/react';
 import numbersChapter from '../data/chapters/numbers.json';
 import arithmeticChapter from '../data/chapters/arithmetic.json';
+import programmingChapter from '../data/chapters/programming.json';
+import naturalLanguageChapter from '../data/chapters/natural_language.json';
 import dictionary from '../data/dictionary.json';
 
 type Chapter = typeof numbersChapter;
 type Lesson = Chapter['lessons'][0];
 
-const chapters = [numbersChapter, arithmeticChapter];
+const chapters = [numbersChapter, arithmeticChapter, programmingChapter, naturalLanguageChapter];
 
 export default function Home() {
   const [selectedChapter, setSelectedChapter] = useState<Chapter>(chapters[0]);

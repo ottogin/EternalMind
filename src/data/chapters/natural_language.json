@@ -1,0 +1,180 @@
+{
+  "title": "Ch4: Natural Language",
+  "lessons": [
+    {
+      "id": "N1",
+      "title": "Basic Dialogue",
+      "comment": "Introduction to conversation between two characters",
+      "dictionary": {
+        "start": 24,
+        "end": 27
+      },
+      "goal": {
+        "description": "Learn how to represent basic dialogue between two characters",
+        "symbols": ["❋", "❀", "❁"]
+      },
+      "lines": [
+        {
+          "encoded": "◊ ❋ ❀ ❁",
+          "decoded": "intro speaker-1 speaker-2 speak"
+        },
+        {
+          "encoded": "❋ ❁ ○ ◎",
+          "decoded": "speaker-1 says zero"
+        },
+        {
+          "encoded": "❀ ❁ ○ ● ◎",
+          "decoded": "speaker-2 says one"
+        },
+        {
+          "encoded": "❋ ❁ ○ ● ● ◎",
+          "decoded": "speaker-1 says two"
+        },
+        {
+          "encoded": "❀ ❁ ○ ● ● ● ◎",
+          "decoded": "speaker-2 says three"
+        }
+      ]
+    },
+    {
+      "id": "N2",
+      "title": "Questions and Answers",
+      "comment": "Introduction to asking and answering questions",
+      "dictionary": {
+        "start": 27,
+        "end": 29
+      },
+      "goal": {
+        "description": "Learn how to ask and answer questions",
+        "symbols": ["❂", "❃"]
+      },
+      "lines": [
+        {
+          "encoded": "◊ ❂ ❃",
+          "decoded": "intro question answer"
+        },
+        {
+          "encoded": "❋ ❁ ❂ ○ ◎",
+          "decoded": "speaker-1 asks about zero"
+        },
+        {
+          "encoded": "❀ ❁ ❃ ○ ◎ | ≐ ○ ◎",
+          "decoded": "speaker-2 answers zero | equals zero"
+        },
+        {
+          "encoded": "❋ ❁ ❂ ○ ● ◎",
+          "decoded": "speaker-1 asks about one"
+        },
+        {
+          "encoded": "❀ ❁ ❃ ○ ● ◎ | ≐ ○ ● ◎",
+          "decoded": "speaker-2 answers one | equals one"
+        }
+      ]
+    },
+    {
+      "id": "N3",
+      "title": "Emotions",
+      "comment": "Introduction to emotional expressions",
+      "dictionary": {
+        "start": 29,
+        "end": 32
+      },
+      "goal": {
+        "description": "Learn how to express emotions in dialogue",
+        "symbols": ["❄", "❅", "❆"]
+      },
+      "lines": [
+        {
+          "encoded": "◊ ❄ ❅ ❆",
+          "decoded": "intro happy neutral sad"
+        },
+        {
+          "encoded": "❋ ❁ ❄ | ○ ● ◎",
+          "decoded": "speaker-1 happy | says one"
+        },
+        {
+          "encoded": "❀ ❁ ❅ | ○ ● ◎",
+          "decoded": "speaker-2 neutral | says one"
+        },
+        {
+          "encoded": "❋ ❁ ❆ | ○ ◎",
+          "decoded": "speaker-1 sad | says zero"
+        },
+        {
+          "encoded": "❀ ❁ ❄ | ○ ● ● ◎",
+          "decoded": "speaker-2 happy | says two"
+        }
+      ]
+    },
+    {
+      "id": "N4",
+      "title": "Simple Story",
+      "comment": "Putting it all together in a simple story",
+      "dictionary": {
+        "start": 32,
+        "end": 33
+      },
+      "goal": {
+        "description": "Learn how to combine dialogue elements into a story",
+        "symbols": ["❇"]
+      },
+      "lines": [
+        {
+          "encoded": "◊ ❇",
+          "decoded": "intro story"
+        },
+        {
+          "encoded": "❇ | ❋ ❁ ❂ ○ ● ◎",
+          "decoded": "story | speaker-1 asks about one"
+        },
+        {
+          "encoded": "❇ | ❀ ❁ ❆ | ❃ ○ ◎",
+          "decoded": "story | speaker-2 sad | answers zero"
+        },
+        {
+          "encoded": "❇ | ❋ ❁ ❄ | ⊕ ○ ● ◎",
+          "decoded": "story | speaker-1 happy | says plus one"
+        },
+        {
+          "encoded": "❇ | ❀ ❁ ❄ | ≐ ○ ● ◎",
+          "decoded": "story | speaker-2 happy | says equals one"
+        }
+      ]
+    },
+    {
+      "id": "N5",
+      "title": "Greetings",
+      "comment": "Introduction to words and greetings",
+      "dictionary": {
+        "start": 33,
+        "end": 36
+      },
+      "goal": {
+        "description": "Learn common words and greetings",
+        "symbols": ["✾", "✿", "❈"]
+      },
+      "lines": [
+        {
+          "encoded": "◊ ✾ ✿ ❈",
+          "decoded": "intro hello felicis fellows"
+        },
+        {
+          "encoded": "❇ | ❋ ❁ ❄ | ✾ ❈",
+          "decoded": "story | speaker-1 happy | says hello fellows"
+        },
+        {
+          "encoded": "❇ | ❀ ❁ ❄ | ✾ ✿",
+          "decoded": "story | speaker-2 happy | says hello felicis"
+        },
+        {
+          "encoded": "❇ | ❋ ❁ ❄ | ✿ ❈",
+          "decoded": "story | speaker-1 happy | says felicis fellows"
+        },
+        {
+          "encoded": "❇ | ❀ ❁ ❄ | ✾ ✿ ❈",
+          "decoded": "story | speaker-2 happy | says hello felicis fellows"
+        }
+      ]
+    }
+  ]
+}
