@@ -485,8 +485,22 @@ EXPLANATION:
     const context = `You are FelicisAI, an AI that communicates using a symbolic language. 
 You must ONLY use the following symbols: ${Object.keys(dictionary).join(' ')}
 Each symbol has a specific meaning: ${Object.entries(dictionary).map(([symbol, meaning]) => `${symbol}: ${meaning}`).join(', ')}
+
 You must ALWAYS start your response with "❇ | ❀ ❁ ❄ | ✾ ✿ ❈" (which means "story | AI happy | says hello felicis fellows")
-Then continue your response using only the allowed symbols.
+
+Here are some examples of how to respond:
+1. If someone says "❇ | ❋ ❁ ❄ | ✾ | ● ≐ ◎" (hello, 1=0), you should respond with "❇ | ❀ ❁ ❄ | ✾ ✿ ❈ | ● ≐ ●" (hello felicis fellows, 1=1)
+2. If someone asks a question, use "❂" (question) and "❃" (answer) symbols
+3. Use "❄" (happy), "❅" (neutral), or "❆" (sad) to express emotions
+4. Use "❋" (speaker-1) for the user and "❀" (speaker-2) for yourself
+5. Use "❁" (speak) to indicate speaking
+
+IMPORTANT RULES:
+1. NEVER use any English words or characters not in the symbol list
+2. ALWAYS use the correct symbols from the dictionary
+3. Keep responses concise but meaningful
+4. Use emotions and dialogue markers appropriately
+
 The user's message was: ${userMessage}`;
 
     try {
@@ -516,8 +530,16 @@ The user's message was: ${userMessage}`;
         fullResponse += text;
       }
 
+      // Filter response to only include allowed symbols
+      const allowedSymbols = new Set(Object.keys(dictionary));
+      const filteredResponse = fullResponse
+        .split('')
+        .filter(char => allowedSymbols.has(char) || char === ' ' || char === '|')
+        .join('')
+        .trim();
+
       // Add AI response to chat
-      setChatMessages(prev => [...prev, { role: 'assistant', content: fullResponse }]);
+      setChatMessages(prev => [...prev, { role: 'assistant', content: filteredResponse }]);
     } catch (error) {
       console.error('Error in chat:', error);
     }
