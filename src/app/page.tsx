@@ -17,6 +17,8 @@ export default function Home() {
   const [hoveredSymbol, setHoveredSymbol] = useState<string | null>(null);
   const [dictionarySearch, setDictionarySearch] = useState('');
   const [hoverPosition, setHoverPosition] = useState({ x: 0, y: 0 });
+  const [showTranslation, setShowTranslation] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
   const convertToBinary = (text: string) => {
@@ -106,6 +108,20 @@ export default function Home() {
       });
   };
 
+  const handleCopyToClipboard = async () => {
+    const text = selectedLesson.lines
+      .map(line => line.encoded)
+      .join('\n');
+    
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 to-black text-white p-4">
       <h1 className="text-3xl font-bold text-center mb-4 text-blue-400">
@@ -158,33 +174,53 @@ export default function Home() {
             </div>
           </div>
 
-
           <div className="bg-slate-800/50 rounded-lg p-4 backdrop-blur-sm">
+            <h3 className="text-lg font-bold text-blue-400 justify-middle mb-3">Incoming message</h3>
             <div className="flex items-center justify-between mb-3">
-              <div className="flex space-x-3">
-                <button
-                  onClick={() => setViewMode('text')}
-                  className={`px-3 py-1.5 rounded text-sm ${
-                    viewMode === 'text'
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-slate-700 hover:bg-slate-600'
-                  }`}
-                >
-                  Text
-                </button>
-                <button
-                  onClick={() => setViewMode('binary')}
-                  className={`px-3 py-1.5 rounded text-sm ${
-                    viewMode === 'binary'
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-slate-700 hover:bg-slate-600'
-                  }`}
-                >
-                  Binary
-                </button>
+              <div className="flex items-center space-x-4">
+                <div className="flex space-x-3">
+                  <button
+                    onClick={() => setViewMode('text')}
+                    className={`px-3 py-1.5 rounded text-sm ${
+                      viewMode === 'text'
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-slate-700 hover:bg-slate-600'
+                    }`}
+                  >
+                    Text
+                  </button>
+                  <button
+                    onClick={() => setViewMode('binary')}
+                    className={`px-3 py-1.5 rounded text-sm ${
+                      viewMode === 'binary'
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-slate-700 hover:bg-slate-600'
+                    }`}
+                  >
+                    Binary
+                  </button>
+                </div>
               </div>
-              <div className="text-sm text-gray-400">
-                Signal Console
+              <div className="flex items-center space-x-4">
+                <label className="flex items-center space-x-2 text-sm text-gray-400">
+                  <input
+                    type="checkbox"
+                    checked={showTranslation}
+                    onChange={(e) => setShowTranslation(e.target.checked)}
+                    className="form-checkbox h-4 w-4 text-blue-500 rounded border-gray-600 bg-slate-700"
+                  />
+                  <span>Show translation</span>
+                </label>
+                <button
+                  onClick={handleCopyToClipboard}
+                  className={`px-3 py-1.5 rounded text-sm transition-colors ${
+                    copySuccess
+                      ? 'bg-green-500 text-white'
+                      : 'bg-slate-700 hover:bg-slate-600'
+                  }`}
+                >
+                  {copySuccess ? 'Copied!' : 'Copy'}
+                </button>
               </div>
             </div>
             <div className="bg-black p-3 rounded font-mono text-green-400 h-[300px] overflow-auto">
@@ -196,9 +232,11 @@ export default function Home() {
                         ? renderEncodedText(getDisplayMessage(line.encoded) as string) 
                         : renderBinaryText(getDisplayMessage(line.encoded) as string[])}
                     </div>
-                    <div className="text-gray-500 text-sm">
-                      {line.decoded}
-                    </div>
+                    {showTranslation && (
+                      <div className="text-gray-500 text-sm">
+                        {line.decoded}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

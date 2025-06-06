@@ -1,52 +1,202 @@
 {
-  "title": "Chapter 1: Numbers",
-  "description": "Introduction to basic numerical concepts",
-  "lessons": [
-    {
-      "id": "1.1",
-      "title": "Basic Numbers",
-      "lines": [
-        {
-          "encoded": "ÄŁÄ",
-          "decoded": "1=1"
+    "title": "Ch1: Numbers",
+    "lessons": [
+      {
+        "id": "N1",
+        "title": "Unary Counting",
+        "comment": "Introduction to basic counting using unary notation",
+        "dictionary": {
+          "start": 0,
+          "end": 7
         },
-        {
-          "encoded": "ÉŁÉ",
-          "decoded": "0=0"
-        }
-      ],
-      "goal": {
-        "description": "Learn to recognize basic numbers",
-        "symbols": ["Ä", "É", "Ł"]
-      },
-      "comment": "We start with the most basic numerical concepts: one and zero",
-      "dictionary": {
-        "start": 0,
-        "end": 3
-      }
-    },
-    {
-      "id": "1.2",
-      "title": "Number Comparison",
-      "lines": [
-        {
-          "encoded": "ÄŤÉ",
-          "decoded": "1!=0"
+        "goal": {
+          "description": "Learn the basic symbols for introduction, equality, integers, and unary counting",
+          "symbols": ["◊", "△", "□", "○", "●", "◎"]
         },
-        {
-          "encoded": "ÉŤÄ",
-          "decoded": "0!=1"
-        }
-      ],
-      "goal": {
-        "description": "Learn to compare numbers",
-        "symbols": ["Ť"]
+        "lines": [
+          {
+            "encoded": "◊ ○",
+            "decoded": "intro unary"
+          },
+          {
+            "encoded": "◊ △",
+            "decoded": "intro is"
+          },
+          {
+            "encoded": "◊ □",
+            "decoded": "intro int"
+          },
+          {
+            "encoded": "△ □ | ○ ◎",
+            "decoded": "is int | unary 0"
+          },
+          {
+            "encoded": "△ □ | ○ ● ◎",
+            "decoded": "is int | unary 1 0"
+          },
+          {
+            "encoded": "△ □ | ○ ● ● ◎",
+            "decoded": "is int | unary 1 1 0"
+          },
+          {
+            "encoded": "△ □ | ○ ● ● ● ◎",
+            "decoded": "is int | unary 1 1 1 0"
+          },
+          {
+            "encoded": "△ □ | ○ ● ● ● ● ◎",
+            "decoded": "is int | unary 1 1 1 1 0"
+          },
+          {
+            "encoded": "△ □ | ○ ● ● ● ● ● ◎",
+            "decoded": "is int | unary 1 1 1 1 1 0"
+          },
+          {
+            "encoded": "△ □ | ○ ● ● ● ● ● ● ◎",
+            "decoded": "is int | unary 1 1 1 1 1 1 0"
+          },
+          {
+            "encoded": "△ □ | ○ ● ● ● ● ● ● ● ◎",
+            "decoded": "is int | unary 1 1 1 1 1 1 1 0"
+          },
+          {
+            "encoded": "△ □ | ○ ● ● ● ● ● ● ● ● ◎",
+            "decoded": "is int | unary 1 1 1 1 1 1 1 1 0"
+          },
+          {
+            "encoded": "△ □ | ○ ● ● ● ● ● ● ● ● ● ◎",
+            "decoded": "is int | unary 1 1 1 1 1 1 1 1 1 0"
+          },
+          {
+            "encoded": "△ □ | ○ ● ● ● ● ● ● ● ● ● ● ◎",
+            "decoded": "is int | unary 1 1 1 1 1 1 1 1 1 1 0"
+          },
+          {
+            "encoded": "△ □ | ○ ● ● ● ● ● ● ● ● ● ● ● ◎",
+            "decoded": "is int | unary 1 1 1 1 1 1 1 1 1 1 1 0"
+          },
+          {
+            "encoded": "△ □ | ○ ● ● ● ● ● ● ● ● ● ● ● ● ◎",
+            "decoded": "is int | unary 1 1 1 1 1 1 1 1 1 1 1 1 0"
+          },
+          {
+            "encoded": "△ □ | ○ ● ● ● ● ● ● ● ● ● ● ● ● ● ◎",
+            "decoded": "is int | unary 1 1 1 1 1 1 1 1 1 1 1 1 1 0"
+          },
+          {
+            "encoded": "△ □ | ○ ● ● ● ● ● ● ● ● ● ● ● ● ● ● ◎",
+            "decoded": "is int | unary 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0"
+          },
+          {
+            "encoded": "△ □ | ○ ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ◎",
+            "decoded": "is int | unary 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0"
+          }
+        ]
       },
-      "comment": "Introducing the concept of inequality",
-      "dictionary": {
-        "start": 3,
-        "end": 4
+      {
+        "id": "N2",
+        "title": "Square Numbers",
+        "comment": "Introduction to square numbers using unary notation",
+        "dictionary": {
+          "start": 5,
+          "end": 8
+        },
+        "goal": {
+          "description": "Learn about square numbers and their representation",
+          "symbols": ["◇"]
+        },
+        "lines": [
+          {
+            "encoded": "◊ ◇",
+            "decoded": "intro square"
+          },
+          {
+            "encoded": "△ ◇ | ○ ◎",
+            "decoded": "is square | unary 0"
+          },
+          {
+            "encoded": "△ ◇ | ○ ● ◎",
+            "decoded": "is square | unary 1 0"
+          },
+          {
+            "encoded": "△ ◇ | ○ ● ● ● ● ◎",
+            "decoded": "is square | unary 1 1 1 1 0"
+          },
+          {
+            "encoded": "△ ◇ | ○ ● ● ● ● ● ● ● ● ● ◎",
+            "decoded": "is square | unary 1 1 1 1 1 1 1 1 1 0"
+          },
+          {
+            "encoded": "△ ◇ | ○ ● ● ● ● ● ● ● ● ● ● ● ● ● ● ◎",
+            "decoded": "is square | unary 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0"
+          },
+          {
+            "encoded": "△ ◇ | ○ ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ◎",
+            "decoded": "is square | unary 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0"
+          }
+        ]
+      },
+      {
+        "id": "N3",
+        "title": "Prime Numbers",
+        "comment": "Introduction to prime numbers using unary notation",
+        "dictionary": {
+          "start": 8,
+          "end": 9
+        },
+        "goal": {
+          "description": "Learn about prime numbers and their representation",
+          "symbols": ["◆"]
+        },
+        "lines": [
+          {
+            "encoded": "◊ ◆",
+            "decoded": "intro prime"
+          },
+          {
+            "encoded": "△ ◆ | ○ ● ● ◎",
+            "decoded": "is prime | unary 1 1 0"
+          },
+          {
+            "encoded": "△ ◆ | ○ ● ● ● ◎",
+            "decoded": "is prime | unary 1 1 1 0"
+          },
+          {
+            "encoded": "△ ◆ | ○ ● ● ● ● ● ◎",
+            "decoded": "is prime | unary 1 1 1 1 1 0"
+          },
+          {
+            "encoded": "△ ◆ | ○ ● ● ● ● ● ● ● ◎",
+            "decoded": "is prime | unary 1 1 1 1 1 1 1 0"
+          },
+          {
+            "encoded": "△ ◆ | ○ ● ● ● ● ● ● ● ● ● ● ◎",
+            "decoded": "is prime | unary 1 1 1 1 1 1 1 1 1 1 1 0"
+          },
+          {
+            "encoded": "△ ◆ | ○ ● ● ● ● ● ● ● ● ● ● ● ● ● ◎",
+            "decoded": "is prime | unary 1 1 1 1 1 1 1 1 1 1 1 1 1 0"
+          },
+          {
+            "encoded": "△ ◆ | ○ ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ◎",
+            "decoded": "is prime | unary 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0"
+          },
+          {
+            "encoded": "△ ◆ | ○ ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ◎",
+            "decoded": "is prime | unary 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0"
+          },
+          {
+            "encoded": "△ ◆ | ○ ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ◎",
+            "decoded": "is prime | unary 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0"
+          },
+          {
+            "encoded": "△ ◆ | ○ ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ◎",
+            "decoded": "is prime | unary 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0"
+          },
+          {
+            "encoded": "△ ◆ | ○ ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ● ◎",
+            "decoded": "is prime | unary 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0"
+          }
+        ]
       }
-    }
-  ]
-} 
+    ]
+  }
