@@ -272,10 +272,12 @@ export default function Home() {
         meaning.toLowerCase().includes(searchLower)
       )
       .map(([symbol, meaning], index) => {
-        const isInCurrentRange = index >= selectedLesson.dictionary.start && 
-                               index < selectedLesson.dictionary.end;
-        const isNewSymbol = index === selectedLesson.dictionary.end - 1;
-        const isFutureSymbol = index >= selectedLesson.dictionary.end;
+        // In AI mode, all symbols are considered learned (not new or future)
+        const isInCurrentRange = isAiMode ? false : 
+          (index >= selectedLesson.dictionary.start && 
+           index < selectedLesson.dictionary.end);
+        const isNewSymbol = !isAiMode && index === selectedLesson.dictionary.end - 1;
+        const isFutureSymbol = !isAiMode && index >= selectedLesson.dictionary.end;
         
         return {
           symbol,
@@ -573,15 +575,19 @@ The user's message was: ${userMessage}`;
         {/* Left Side */}
         <div className="space-y-4">
           <div className="bg-slate-800/50 rounded-lg p-4 backdrop-blur-sm">
-            <div className="flex space-x-4 mb-3 overflow-x-auto pb-2">
+            <div className="flex flex-wrap gap-2 mb-3">
               {chapters.map((chapter) => (
                 <button
                   key={chapter.title}
                   onClick={() => handleChapterSelect(chapter)}
-                  className={`px-3 py-1.5 rounded whitespace-nowrap text-sm ${
+                  className={`px-2 py-1 rounded text-sm ${
                     selectedChapter.title === chapter.title
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-slate-700 hover:bg-slate-600'
+                      ? chapter.title === 'Ch5: FelicisAI'
+                        ? 'bg-orange-500 text-white'
+                        : 'bg-blue-500 text-white'
+                      : chapter.title === 'Ch5: FelicisAI'
+                        ? 'bg-orange-500/50 hover:bg-orange-500/70'
+                        : 'bg-slate-700 hover:bg-slate-600'
                   }`}
                 >
                   {chapter.title}
@@ -615,8 +621,8 @@ The user's message was: ${userMessage}`;
           </div>
 
           <div className="bg-slate-800/50 rounded-lg p-4 backdrop-blur-sm">
-            <h3 className="text-lg font-bold text-blue-400 justify-middle mb-3">
-              {isAiMode ? 'Chat with FelicisAI' : 'Incoming message'}
+            <h3 className="text-lg font-bold text-blue-400 mb-3">
+              {isAiMode ? 'Chat with FelicisAI' : 'Incoming Message'}
             </h3>
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center space-x-4">
@@ -871,7 +877,7 @@ The user's message was: ${userMessage}`;
 
           <div className="bg-slate-800/50 rounded-lg p-4 backdrop-blur-sm">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-bold text-blue-400">Message Improving Suggestion</h2>
+              <h2 className="text-lg font-bold text-blue-400">Message Improvement</h2>
               <div className="flex items-center space-x-3">
                 {isGeneratingFeedback && (
                   <div className="text-sm text-blue-400">
@@ -924,7 +930,7 @@ The user's message was: ${userMessage}`;
 
           <div className="bg-slate-800/50 rounded-lg p-4 backdrop-blur-sm">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-bold text-blue-400">Feedback on the message structure</h2>
+              <h2 className="text-lg font-bold text-blue-400">Message Structure</h2>
               {isGeneratingFeedback && (
                 <div className="text-sm text-blue-400">
                   Generating feedback...
