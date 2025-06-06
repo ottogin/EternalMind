@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { useChat } from 'ai/react';
 import numbersChapter from '../data/chapters/numbers.json';
 import arithmeticChapter from '../data/chapters/arithmetic.json';
 import dictionary from '../data/dictionary.json';
@@ -20,6 +21,15 @@ export default function Home() {
   const [showTranslation, setShowTranslation] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
   const tooltipRef = useRef<HTMLDivElement>(null);
+  const [isDecoding, setIsDecoding] = useState(false);
+  const [aiResponse, setAiResponse] = useState('');
+
+  const { error } = useChat({
+    api: '/api/chat',
+    onError: (error) => {
+      console.error('Chat error:', error);
+    }
+  });
 
   const convertToBinary = (text: string) => {
     return text.split('').map(char => 
@@ -52,6 +62,12 @@ export default function Home() {
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, [hoveredSymbol]);
+
+  useEffect(() => {
+    if (error) {
+      console.error('Chat error:', error);
+    }
+  }, [error]);
 
   const renderEncodedText = (text: string) => {
     return text.split('').map((char, index) => (
@@ -119,6 +135,58 @@ export default function Home() {
       setTimeout(() => setCopySuccess(false), 2000);
     } catch (err) {
       console.error('Failed to copy text: ', err);
+    }
+  };
+
+  const handleDecode = async () => {
+    console.log('Decode button clicked');
+    setIsDecoding(true);
+    setAiResponse('');
+    
+    const currentDictionary = Object.entries(dictionary)
+      .slice(0, selectedLesson.dictionary.end)
+      .map(([symbol, meaning]) => `${symbol}: ${meaning}`)
+      .join('\n');
+
+    const prompt = `You received a signal from a far-away galaxy. This is what you were able to decode so far:
+
+${currentDictionary}
+
+This is a new portion of the message teaching you something new:
+${selectedLesson.lines.map(line => line.encoded).join('\n')}
+
+Detect the new symbols and try to understand what they mean. Provide your reasoning.`;
+
+    console.log('Sending prompt:', prompt);
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ data: { prompt } }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error('No reader available');
+      }
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        const text = new TextDecoder().decode(value);
+        setAiResponse(prev => prev + text);
+      }
+    } catch (error) {
+      console.error('Error submitting:', error);
+    } finally {
+      setIsDecoding(false);
     }
   };
 
@@ -309,6 +377,44 @@ export default function Home() {
                   )}
                 </div>
               ))}
+            </div>
+          </div>
+
+          <div className="bg-slate-800/50 rounded-lg p-4 backdrop-blur-sm">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-lg font-bold text-blue-400">AI Analysis</h2>
+              <button
+                onClick={handleDecode}
+                disabled={isDecoding}
+                className={`px-4 py-2 rounded text-sm font-medium transition-colors ${
+                  isDecoding
+                    ? 'bg-slate-600 cursor-not-allowed'
+                    : 'bg-blue-500 hover:bg-blue-600'
+                }`}
+              >
+                {isDecoding ? 'Decoding...' : 'Decode'}
+              </button>
+            </div>
+            <div className="bg-black p-3 rounded font-mono h-[300px] overflow-auto">
+              <div className="space-y-4">
+                {aiResponse && (
+                  <div className="p-2 rounded bg-green-500/20 text-green-300">
+                    <div className="font-bold mb-1">AI Response</div>
+                    <div className="text-sm whitespace-pre-wrap">{aiResponse}</div>
+                  </div>
+                )}
+                {isDecoding && (
+                  <div className="p-2 rounded bg-blue-500/20 text-blue-300">
+                    <div className="font-bold mb-1">AI Response</div>
+                    <div className="text-sm">
+                      <span className="inline-block animate-pulse">Decoding</span>
+                      <span className="inline-block animate-bounce delay-100">.</span>
+                      <span className="inline-block animate-bounce delay-200">.</span>
+                      <span className="inline-block animate-bounce delay-300">.</span>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
