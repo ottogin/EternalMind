@@ -28,6 +28,8 @@ export default function Home() {
   const [feedbackResponse, setFeedbackResponse] = useState('');
   const [isGeneratingFeedback, setIsGeneratingFeedback] = useState(false);
   const [messageDiff, setMessageDiff] = useState<{ original: string; updated: string } | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
 
   const { error } = useChat({
     api: '/api/chat',
@@ -67,12 +69,76 @@ export default function Home() {
     return rows;
   };
 
+  const createBinaryAudio = async (text: string) => {
+    // Create AudioContext if it doesn't exist
+    let context = audioContext;
+    if (!context) {
+      context = new AudioContext();
+      setAudioContext(context);
+    }
+
+    // Convert text to binary
+    const binaryArray = convertToBinary(text);
+    const binaryString = binaryArray.join('');
+    
+    // Audio parameters
+    const frequency = 800; // Frequency of the beep (Hz)
+    const bitDuration = 0.1; // Duration of each bit (seconds)
+    
+    // Create an array of oscillators and gains
+    const oscillators: OscillatorNode[] = [];
+    const gains: GainNode[] = [];
+    
+    // Schedule the beeps
+    binaryString.split('').forEach((bit, index) => {
+      if (bit === '1') {
+        const oscillator = context.createOscillator();
+        const gainNode = context.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(context.destination);
+        
+        oscillator.frequency.value = frequency;
+        gainNode.gain.value = 0;
+        
+        const startTime = index * bitDuration;
+        
+        // Smooth transitions to avoid clicks
+        gainNode.gain.setValueAtTime(0, startTime);
+        gainNode.gain.linearRampToValueAtTime(0.2, startTime + 0.01);
+        gainNode.gain.linearRampToValueAtTime(0, startTime + bitDuration - 0.01);
+        
+        oscillator.start(startTime);
+        oscillator.stop(startTime + bitDuration);
+        
+        oscillators.push(oscillator);
+        gains.push(gainNode);
+      }
+    });
+
+    return {
+      play: () => {
+        setIsPlaying(true);
+        context.resume();
+      },
+      stop: () => {
+        setIsPlaying(false);
+        context.close().then(() => {
+          setAudioContext(null);
+        });
+      },
+      duration: binaryString.length * bitDuration
+    };
+  };
+
   const getDisplayMessage = (text: string): string | string[] => {
     switch (viewMode) {
       case 'binary':
         return convertToBinary(text);
       case 'image':
         return createBinaryImage(text);
+      case 'audio':
+        return text;
       case 'text':
       default:
         return text;
@@ -139,6 +205,52 @@ export default function Home() {
             {row}
           </div>
         ))}
+      </div>
+    );
+  };
+
+  const renderAudioPlayer = (lines: { encoded: string }[]) => {
+    const handlePlay = async () => {
+      if (isPlaying) {
+        audioContext?.close();
+        setAudioContext(null);
+        setIsPlaying(false);
+        return;
+      }
+
+      // Concatenate all lines into one string
+      const fullText = lines.map(line => line.encoded).join('');
+      const audio = await createBinaryAudio(fullText);
+      audio.play();
+      
+      // Stop playing after the sequence is complete
+      setTimeout(() => {
+        audio.stop();
+      }, audio.duration * 1000);
+    };
+
+    return (
+      <div className="flex flex-col items-center justify-center space-y-4 p-4">
+        <button
+          onClick={handlePlay}
+          className={`px-8 py-3 rounded-full ${
+            isPlaying 
+              ? 'bg-red-500 hover:bg-red-600' 
+              : 'bg-green-500 hover:bg-green-600'
+          } text-white font-medium transition-colors flex items-center space-x-2`}
+        >
+          <span>{isPlaying ? 'Stop Transmission' : 'Transmit Full Message'}</span>
+          {isPlaying && (
+            <div className="flex space-x-1 ml-2">
+              <div className="w-2 h-2 bg-white rounded-full animate-pulse" style={{ animationDelay: '0ms' }}></div>
+              <div className="w-2 h-2 bg-white rounded-full animate-pulse" style={{ animationDelay: '200ms' }}></div>
+              <div className="w-2 h-2 bg-white rounded-full animate-pulse" style={{ animationDelay: '400ms' }}></div>
+            </div>
+          )}
+        </button>
+        <div className="text-sm text-gray-400">
+          {isPlaying ? 'Broadcasting interstellar signal...' : 'Ready to broadcast'}
+        </div>
       </div>
     );
   };
@@ -424,6 +536,16 @@ EXPLANATION:
                   >
                     Image
                   </button>
+                  <button
+                    onClick={() => setViewMode('audio')}
+                    className={`px-3 py-1.5 rounded text-sm ${
+                      viewMode === 'audio'
+                        ? 'bg-blue-500 text-white'
+                        : 'bg-slate-700 hover:bg-slate-600'
+                    }`}
+                  >
+                    Audio
+                  </button>
                 </div>
               </div>
               <div className="flex items-center space-x-4">
@@ -450,22 +572,28 @@ EXPLANATION:
             </div>
             <div className="bg-black p-3 rounded font-mono text-green-400 h-[300px] overflow-auto">
               <div className="space-y-3">
-                {selectedLesson.lines.map((line, index) => (
-                  <div key={index} className="space-y-0.5">
-                    <div className="text-green-400">
-                      {viewMode === 'text' 
-                        ? renderEncodedText(getDisplayMessage(line.encoded) as string) 
-                        : viewMode === 'binary'
-                        ? renderBinaryText(getDisplayMessage(line.encoded) as string[])
-                        : renderBinaryImage(getDisplayMessage(line.encoded) as string[])}
-                    </div>
-                    {showTranslation && (
-                      <div className="text-gray-500 text-sm">
-                        {line.decoded}
+                {viewMode === 'audio' ? (
+                  renderAudioPlayer(selectedLesson.lines)
+                ) : (
+                  selectedLesson.lines.map((line, index) => (
+                    <div key={index} className="space-y-0.5">
+                      <div className="text-green-400">
+                        {viewMode === 'text' 
+                          ? renderEncodedText(getDisplayMessage(line.encoded) as string) 
+                          : viewMode === 'binary'
+                          ? renderBinaryText(getDisplayMessage(line.encoded) as string[])
+                          : viewMode === 'image'
+                          ? renderBinaryImage(getDisplayMessage(line.encoded) as string[])
+                          : null}
                       </div>
-                    )}
-                  </div>
-                ))}
+                      {showTranslation && (
+                        <div className="text-gray-500 text-sm">
+                          {line.decoded}
+                        </div>
+                      )}
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>
