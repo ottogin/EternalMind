@@ -23,6 +23,7 @@ export default function Home() {
   const tooltipRef = useRef<HTMLDivElement>(null);
   const [isDecoding, setIsDecoding] = useState(false);
   const [aiResponse, setAiResponse] = useState('');
+  const [sentPrompt, setSentPrompt] = useState('');
 
   const { error } = useChat({
     api: '/api/chat',
@@ -144,7 +145,7 @@ export default function Home() {
     setAiResponse('');
     
     const currentDictionary = Object.entries(dictionary)
-      .slice(0, selectedLesson.dictionary.end)
+      .slice(0, selectedLesson.dictionary.start)
       .map(([symbol, meaning]) => `${symbol}: ${meaning}`)
       .join('\n');
 
@@ -157,6 +158,7 @@ ${selectedLesson.lines.map(line => line.encoded).join('\n')}
 
 Detect the new symbols and try to understand what they mean. Provide your reasoning.`;
 
+    setSentPrompt(prompt);
     console.log('Sending prompt:', prompt);
     try {
       const response = await fetch('/api/chat', {
@@ -219,7 +221,7 @@ Detect the new symbols and try to understand what they mean. Provide your reason
               ))}
             </div>
 
-            <div className="h-[200px] overflow-y-auto pr-2 custom-scrollbar">
+            <div className="h-[250px] overflow-y-auto pr-2 custom-scrollbar">
               <div className="space-y-2">
                 {selectedChapter.lessons.map((lesson) => (
                   <div
@@ -397,10 +399,10 @@ Detect the new symbols and try to understand what they mean. Provide your reason
             </div>
             <div className="bg-black p-3 rounded font-mono h-[300px] overflow-auto">
               <div className="space-y-4">
-                {aiResponse && (
-                  <div className="p-2 rounded bg-green-500/20 text-green-300">
-                    <div className="font-bold mb-1">AI Response</div>
-                    <div className="text-sm whitespace-pre-wrap">{aiResponse}</div>
+                {sentPrompt && (
+                  <div className="p-2 rounded bg-red-500/20 text-red-300">
+                    <div className="font-bold mb-1">Task</div>
+                    <div className="text-sm whitespace-pre-wrap">{sentPrompt}</div>
                   </div>
                 )}
                 {isDecoding && (
@@ -412,6 +414,12 @@ Detect the new symbols and try to understand what they mean. Provide your reason
                       <span className="inline-block animate-bounce delay-200">.</span>
                       <span className="inline-block animate-bounce delay-300">.</span>
                     </div>
+                  </div>
+                )}
+                {aiResponse && (
+                  <div className="p-2 rounded bg-green-500/20 text-green-300">
+                    <div className="font-bold mb-1">AI Response</div>
+                    <div className="text-sm whitespace-pre-wrap">{aiResponse}</div>
                   </div>
                 )}
               </div>

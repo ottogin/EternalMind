@@ -97,7 +97,7 @@
         "title": "Square Numbers",
         "comment": "Introduction to square numbers using unary notation",
         "dictionary": {
-          "start": 5,
+          "start": 7,
           "end": 8
         },
         "goal": {
@@ -105,6 +105,50 @@
           "symbols": ["◇"]
         },
         "lines": [
+            {
+            "encoded": "◊ ○",
+            "decoded": "intro unary"
+            },
+            {
+            "encoded": "◊ △",
+            "decoded": "intro is"
+            },
+            {
+            "encoded": "◊ □",
+            "decoded": "intro int"
+            },
+            {
+            "encoded": "△ □ | ○ ◎",
+            "decoded": "is int | unary 0"
+            },
+            {
+            "encoded": "△ □ | ○ ● ◎",
+            "decoded": "is int | unary 1 0"
+            },
+            {
+            "encoded": "△ □ | ○ ● ● ◎",
+            "decoded": "is int | unary 1 1 0"
+            },
+            {
+            "encoded": "△ □ | ○ ● ● ● ◎",
+            "decoded": "is int | unary 1 1 1 0"
+            },
+            {
+            "encoded": "△ □ | ○ ● ● ● ● ◎",
+            "decoded": "is int | unary 1 1 1 1 0"
+            },
+            {
+            "encoded": "△ □ | ○ ● ● ● ● ● ◎",
+            "decoded": "is int | unary 1 1 1 1 1 0"
+            },
+            {
+            "encoded": "△ □ | ○ ● ● ● ● ● ● ◎",
+            "decoded": "is int | unary 1 1 1 1 1 1 0"
+            },
+            {
+            "encoded": "△ □ | ○ ● ● ● ● ● ● ● ◎",
+            "decoded": "is int | unary 1 1 1 1 1 1 1 0"
+          },
           {
             "encoded": "◊ ◇",
             "decoded": "intro square"
