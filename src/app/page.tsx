@@ -24,6 +24,10 @@ export default function Home() {
   const [isDecoding, setIsDecoding] = useState(false);
   const [aiResponse, setAiResponse] = useState('');
   const [sentPrompt, setSentPrompt] = useState('');
+  const [feedbackPrompt, setFeedbackPrompt] = useState('');
+  const [feedbackResponse, setFeedbackResponse] = useState('');
+  const [isGeneratingFeedback, setIsGeneratingFeedback] = useState(false);
+  const [messageDiff, setMessageDiff] = useState<{ original: string; updated: string } | null>(null);
 
   const { error } = useChat({
     api: '/api/chat',
@@ -143,6 +147,8 @@ export default function Home() {
     console.log('Decode button clicked');
     setIsDecoding(true);
     setAiResponse('');
+    setFeedbackResponse('');
+    setMessageDiff(null);
     
     const currentDictionary = Object.entries(dictionary)
       .slice(0, selectedLesson.dictionary.start)
@@ -178,18 +184,118 @@ Detect the new symbols and try to understand what they mean. Provide your reason
         throw new Error('No reader available');
       }
 
+      let fullResponse = '';
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         
         const text = new TextDecoder().decode(value);
+        fullResponse += text;
         setAiResponse(prev => prev + text);
       }
+
+      // After getting the AI analysis, generate feedback
+      await generateFeedback(fullResponse);
     } catch (error) {
       console.error('Error submitting:', error);
     } finally {
       setIsDecoding(false);
     }
+  };
+
+  const generateFeedback = async (aiAnalysis: string) => {
+    setIsGeneratingFeedback(true);
+    setFeedbackResponse('');
+    setMessageDiff(null);
+
+    const originalMessage = selectedLesson.lines.map(line => line.encoded).join('\n');
+    const lessonGoals = selectedLesson.goal.symbols
+      .map(symbol => `${symbol}: ${dictionary[symbol as keyof typeof dictionary]}`)
+      .join('\n');
+
+    const currentDictionary = Object.entries(dictionary)
+      .slice(0, selectedLesson.dictionary.start)
+      .map(([symbol, meaning]) => `${symbol}: ${meaning}`)
+      .join('\n');
+
+    const prompt = `You are an expert in creating clear and educational messages for extraterrestrial beings. 
+I have a message that needs to be improved for better understanding.
+It contains strange symbols. We know how to decode all of them.
+The goal for this message is to teach the following symbols:
+${lessonGoals}
+
+All other symbols are already known:
+${currentDictionary}
+
+Lesson context:
+Title: ${selectedLesson.title}
+Description: ${selectedLesson.goal.description}
+
+The original message:
+${originalMessage}
+
+How a listener (who is supposed to learn the new symbols) would understand the message:
+${aiAnalysis}
+
+Please provide an improved version of the message that would be easier to understand while maintaining the same meaning.
+You can use only the symbols that are already known and that are in the goals. No English allowed.
+
+Format your response as:
+UPDATED MESSAGE:
+[your improved message]
+
+EXPLANATION:
+[your explanation]`;
+
+    setFeedbackPrompt(prompt);
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ data: { prompt } }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error('No reader available');
+      }
+
+      let fullResponse = '';
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        const text = new TextDecoder().decode(value);
+        fullResponse += text;
+        setFeedbackResponse(prev => prev + text);
+      }
+
+      // Parse the response to extract the updated message
+      const updatedMessageMatch = fullResponse.match(/UPDATED MESSAGE:\n([\s\S]*?)(?=\n\nEXPLANATION:|$)/);
+      if (updatedMessageMatch) {
+        const updatedMessage = updatedMessageMatch[1].trim();
+        setMessageDiff({
+          original: originalMessage,
+          updated: updatedMessage
+        });
+      }
+    } catch (error) {
+      console.error('Error generating feedback:', error);
+    } finally {
+      setIsGeneratingFeedback(false);
+    }
+  };
+
+  const handleCalculateDiff = async () => {
+    if (!aiResponse) return;
+    await generateFeedback(aiResponse);
   };
 
   return (
@@ -400,7 +506,7 @@ Detect the new symbols and try to understand what they mean. Provide your reason
             <div className="bg-black p-3 rounded font-mono h-[300px] overflow-auto">
               <div className="space-y-4">
                 {sentPrompt && (
-                  <div className="p-2 rounded bg-red-500/20 text-red-300">
+                  <div className="p-2 rounded bg-blue-500/20 text-blue-300">
                     <div className="font-bold mb-1">Task</div>
                     <div className="text-sm whitespace-pre-wrap">{sentPrompt}</div>
                   </div>
@@ -420,6 +526,97 @@ Detect the new symbols and try to understand what they mean. Provide your reason
                   <div className="p-2 rounded bg-green-500/20 text-green-300">
                     <div className="font-bold mb-1">AI Response</div>
                     <div className="text-sm whitespace-pre-wrap">{aiResponse}</div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-slate-800/50 rounded-lg p-4 backdrop-blur-sm">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-lg font-bold text-blue-400">Message Improving Suggestion</h2>
+              <div className="flex items-center space-x-3">
+                {isGeneratingFeedback && (
+                  <div className="text-sm text-blue-400">
+                    Analyzing message...
+                  </div>
+                )}
+                <button
+                  onClick={handleCalculateDiff}
+                  disabled={!aiResponse || isGeneratingFeedback || isDecoding}
+                  className={`px-4 py-2 rounded text-sm font-medium transition-colors ${
+                    !aiResponse || isGeneratingFeedback || isDecoding
+                      ? 'bg-slate-600 cursor-not-allowed'
+                      : 'bg-blue-500 hover:bg-blue-600'
+                  }`}
+                >
+                  {isGeneratingFeedback ? '...' : 'Suggest'}
+                </button>
+              </div>
+            </div>
+            <div className="bg-black p-3 rounded font-mono h-[300px] overflow-auto">
+              <div className="space-y-4">
+                {isGeneratingFeedback && !messageDiff && (
+                  <div className="p-2 rounded bg-blue-500/20 text-blue-300">
+                    <div className="font-bold mb-1">Analyzing Message</div>
+                    <div className="text-sm">
+                      <span className="inline-block animate-pulse">Processing</span>
+                      <span className="inline-block animate-bounce delay-100">.</span>
+                      <span className="inline-block animate-bounce delay-200">.</span>
+                      <span className="inline-block animate-bounce delay-300">.</span>
+                    </div>
+                  </div>
+                )}
+                {messageDiff && (
+                  <div className="p-2 rounded bg-yellow-500/20 text-yellow-300">
+                    <div className="text-sm space-y-2">
+                      <div>
+                        <div className="font-semibold text-red-400">Original:</div>
+                        <div className="whitespace-pre-wrap">{messageDiff.original}</div>
+                      </div>
+                      <div>
+                        <div className="font-semibold text-green-400">Updated:</div>
+                        <div className="whitespace-pre-wrap">{messageDiff.updated}</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-slate-800/50 rounded-lg p-4 backdrop-blur-sm">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-lg font-bold text-blue-400">Feedback on the message structure</h2>
+              {isGeneratingFeedback && (
+                <div className="text-sm text-blue-400">
+                  Generating feedback...
+                </div>
+              )}
+            </div>
+            <div className="bg-black p-3 rounded font-mono h-[300px] overflow-auto">
+              <div className="space-y-4">
+                {feedbackPrompt && (
+                  <div className="p-2 rounded bg-blue-500/20 text-blue-300">
+                    <div className="font-bold mb-1">Feedback Request</div>
+                    <div className="text-sm whitespace-pre-wrap">{feedbackPrompt}</div>
+                  </div>
+                )}
+                {isGeneratingFeedback && !feedbackResponse && (
+                  <div className="p-2 rounded bg-blue-500/20 text-blue-300">
+                    <div className="font-bold mb-1">Generating Feedback</div>
+                    <div className="text-sm">
+                      <span className="inline-block animate-pulse">Processing</span>
+                      <span className="inline-block animate-bounce delay-100">.</span>
+                      <span className="inline-block animate-bounce delay-200">.</span>
+                      <span className="inline-block animate-bounce delay-300">.</span>
+                    </div>
+                  </div>
+                )}
+                {feedbackResponse && (
+                  <div className="p-2 rounded bg-green-500/20 text-green-300">
+                    <div className="font-bold mb-1">Feedback Response</div>
+                    <div className="text-sm whitespace-pre-wrap">{feedbackResponse}</div>
                   </div>
                 )}
               </div>
